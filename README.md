@@ -2,7 +2,7 @@
 
 ### A live AI council that can say **WAIT** before an AVAX buy — and show exactly why.
 
-**[▶ Live dashboard](https://darwin-council.vercel.app)** · **[▶ Pitch deck](https://darwin-council.vercel.app/pitch)** · **[🇹🇷 Jüri için (Turkish, for judges)](FOR_JUDGES.md)** · **[Lineage contract](https://testnet.snowtrace.io/address/0xd75db90c8337a12de7293882b0251b0af78619dd)** · **[Commit contract](https://testnet.snowtrace.io/address/0x3cd8babe00dd10c08ebfc6435c1a41e6bde5a95a)**
+**[▶ Live dashboard](https://darwin-council.vercel.app)** *(interface only; the live backend runs locally because it holds a real OKX TR subaccount)* · **[▶ Pitch deck](https://darwin-council.vercel.app/pitch)** · **[🇹🇷 Jüri için (Turkish, for judges)](FOR_JUDGES.md)** · **[Lineage contract](https://testnet.snowtrace.io/address/0xd75db90c8337a12de7293882b0251b0af78619dd)** · **[Commit contract](https://testnet.snowtrace.io/address/0x3cd8babe00dd10c08ebfc6435c1a41e6bde5a95a)**
 
 ![Darwin Council](docs/darwin-council.svg)
 
@@ -14,7 +14,7 @@
 | **Avalanche Fuji (C-Chain testnet)** | `DarwinCommit` (commit/reveal of every forecast and buy decision) and `DarwinLineage` (analyst birth, trial result, retirement) |
 | **OpenAI** | Four specialist analyst roles and a chair that explains but cannot change the decision |
 
-*The hosted dashboard is a static copy of the interface. The live backend runs locally (`127.0.0.1:8787`) and is shown in the live demo.*
+*The hosted dashboard is a static copy of the interface, so it shows no live data. The live backend is intentionally not exposed to the internet: it is connected to a real OKX TR subaccount with trading permission and holds private API keys. It runs locally (`127.0.0.1:8787`) and is shown in the live demo; every decision it makes is publicly verifiable on Snowtrace.*
 
 **Darwin Council** helps a person decide whether *now* is a reasonable moment to buy AVAX on OKX TR. Four AI analysts inspect fresh market data from different angles, challenge one another's views, and vote **BUY**, **WAIT**, or **BLOCK**. The final decision comes from explicit, inspectable rules. A small order is never treated as an automatic buy.
 

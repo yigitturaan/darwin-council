@@ -2,7 +2,7 @@
 
 ### "AL" demeden önce tartışan, gerektiğinde **"BEKLE"** diyen ve her kararını **Avalanche'ta** kanıtlayan AI analist konseyi.
 
-**[▶ Canlı panel](https://darwin-council.vercel.app)** · **[▶ Sunum](https://darwin-council.vercel.app/pitch)** · **[Kod](https://github.com/yigitturaan/darwin-council)** · **[Soy ağacı kontratı (Snowtrace)](https://testnet.snowtrace.io/address/0xd75db90c8337a12de7293882b0251b0af78619dd)** · **[Karar kontratı (Snowtrace)](https://testnet.snowtrace.io/address/0x3cd8babe00dd10c08ebfc6435c1a41e6bde5a95a)**
+**[▶ Canlı panel](https://darwin-council.vercel.app)** *(arayüz; canlı veri için bkz. "Canlı sistem neden yerelde?")* · **[▶ Sunum](https://darwin-council.vercel.app/pitch)** · **[Kod](https://github.com/yigitturaan/darwin-council)** · **[Soy ağacı kontratı (Snowtrace)](https://testnet.snowtrace.io/address/0xd75db90c8337a12de7293882b0251b0af78619dd)** · **[Karar kontratı (Snowtrace)](https://testnet.snowtrace.io/address/0x3cd8babe00dd10c08ebfc6435c1a41e6bde5a95a)**
 
 ![Darwin Konseyi](docs/darwin-council.svg)
 
@@ -63,6 +63,16 @@ Analistler önce birbirini görmeden görüş yazar, sonra tartışır. Uydurma 
 
 ---
 
+## Canlı sistem neden yerelde?
+
+[darwin-council.vercel.app](https://darwin-council.vercel.app) adresindeki sürüm **sadece arayüzdür**; bu yüzden orada canlı OKX verisi ve karar görünmez.
+
+Canlı backend **bilerek internete açılmadı**: gerçek para içeren bir **OKX TR alt hesabına işlem yetkisiyle bağlı** ve özel API anahtarlarını tutuyor. Gerçek emir gönderebilen bir sistemi hackathon süresinde internete açmak yerine, onu yerel makinede çalıştırıp **canlı demoda gösteriyoruz.**
+
+Buna rağmen sistemin ürettiği her şey herkes tarafından doğrulanabilir: aşağıdaki tablodaki tüm tahminler, işlem kararları ve analist kayıtları **Avalanche Fuji'de, Snowtrace üzerinden açıkça görülebilir.**
+
+---
+
 ## Bugünden canlı kanıt
 
 *Canlı sistemden, 17 Ekim 19:23 itibarıyla. Tüm sayılar gerçek; sahte, tekrar oynatılmış ya da elle girilmiş veri yok.*
@@ -107,7 +117,7 @@ AVAX bugün piyasanın belirgin şekilde gerisinde kaldı ve kısa vadede de dü
 |---|---|---|
 | **Agentic Design** · otonomi | Tek tıkla 10 adımlık akış; arka planda kimse tıklamadan 30 dakikada bir tahmin turu açıp mühürleyen, sonucu OKX'ten okuyup puanlayan ve analist değiştiren döngü | ✅ Canlı |
 | **Agentic Design** · akıl yürütme ve araç kullanımı | 4 uzman rol; kör görüş → doğrulama → tartışma; OKX ATK piyasa + hesap + emir araçları; Avalanche kontratları | ✅ Canlı |
-| **Technical Execution** · çalışan ürün | Canlı backend + Türkçe panel; arayüz ve sunum Vercel'de | ✅ (backend yerel makinede) |
+| **Technical Execution** · çalışan ürün | Canlı backend + Türkçe panel; arayüz ve sunum Vercel'de | ✅ (backend güvenlik gereği yerelde; bkz. "Canlı sistem neden yerelde?") |
 | **Technical Execution** · mimari ve zorluk | Kesinti sonrası zincirden kurtarma, tekrar gönderimi önleyen kimlikler, "kabul" ile "gerçekleşti"yi ayıran emir takibi, eşleşmiş canlı sınav | ✅ |
 | **Avalanche** · deploy | İki kontrat Avalanche Fuji'de (C-Chain test ağı) | ✅ Fuji · ana ağ sıradaki adım |
 | **Avalanche** · güçlü yanlar | Hızlı kesinlik: işlem kararı mühürlenip ~4 saniyede açılıyor, emirden önce bağlayıcı oluyor; tahminler hedeften 28–30 dk önce zincirde | ✅ |
