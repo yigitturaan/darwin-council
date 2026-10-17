@@ -1,60 +1,123 @@
 # Darwin Council
 
-**A live council of AI market analysts that has to show its work.** Four specialists read OKX TR market data, make independent assessments, review one another's arguments, and reach a rule based decision. Their forecasts and trade assessments are committed to Avalanche Fuji before the outcome is known. Over time, a challenger analyst can earn a seat by outperforming an incumbent on future live rounds.
+### A live AI council that can say **WAIT** before an AVAX buy — and show exactly why.
 
-The product has two connected loops:
+**Darwin Council** helps a person decide whether *now* is a reasonable moment to buy AVAX on OKX TR. Four AI analysts inspect fresh market data from different angles, challenge one another's views, and vote **BUY**, **WAIT**, or **BLOCK**. The final decision comes from explicit, inspectable rules. A small order is never treated as an automatic buy.
 
-1. **Autonomous evaluation:** the council forecasts whether the next completed AVAX/USDT candle 30 minutes ahead will close higher. The result is checked against the real OKX TR candle, scored with the Brier rule, and revealed on Fuji. These rounds never place orders.
-2. **On demand trade review:** a user asks whether to buy 5 USDT of AVAX now. The council votes **BUY, WAIT, or BLOCK** using fresh market data. A hard coded policy checks data freshness, spread, order book depth, price movement during review, and verified votes. A real OKX TR spot order is possible only when the user explicitly enables execution, the council returns BUY, and the separate order safeguards pass.
+Meanwhile, the same analysts take an ongoing test: they forecast the next 30 minute AVAX/USDT outcome, lock their answer on Avalanche Fuji before it is known, and are scored against the real result. A new analyst can earn a seat only by beating an incumbent on future live rounds.
 
-The current interface is in Turkish; this README documents the project in English.
+> **The useful output is a decision with reasons, including a reason to do nothing.** The forecast loop measures the analysts; it does not trade by itself.
 
-## Why it exists
+## The problem
 
-AI trading opinions are easy to generate and hard to audit. Darwin Council records what each analyst claimed, checks numerical claims against the market snapshot, locks forecasts before the answer is available, and measures performance after the fact. The system can also decline a trade. A small order amount alone never forces a BUY decision.
+“AI says buy” is easy to produce. It rarely tells you which data it used, whether a quoted number was real, what changed while the agent was thinking, or why a trade was allowed. A one word signal also hides the most valuable answer in a risky market: **wait**.
 
-## What is live
+Darwin Council turns that vague signal into a review a user can inspect: independent opinions, checked numerical claims, a second vote after discussion, a fresh market snapshot, and a visible rule for the final decision. The council's past forecasts are scored and shown on the board rather than described as successful without evidence.
 
-- **Market:** the official OKX Agent Trade Kit CLI reads OKX TR ticker, candles, order book, and available derivatives context. Missing or stale sources are shown as such; they are not replaced with sample data.
-- **Agents:** OpenAI model calls power four specialist roles: momentum, liquidity, relative market/derivatives, and volatility. Analysts first answer without seeing peers, then revise after seeing their verified initial views. Claims that fail the numerical verifier do not count toward consensus.
-- **Chain:** Solidity contracts on Avalanche Fuji provide commit and reveal records for forecasts and trade assessments, plus analyst lineage and promotion or rejection events. A chain commitment proves that the committed bytes were fixed at that time; it does not prove a forecast was correct.
-- **Evolution:** after enough resolved live rounds, a challenger is generated from an underperforming role. It is evaluated on six *future* paired rounds before a promotion or rejection. A challenger does not influence the council while on trial.
-- **Dashboard:** a live council view shows the current assessment and agent explanations. A separate board shows the last decision, decision inputs, policy checks, round history, evolution, and system state.
+## See it work
 
-No replayed market data, fabricated agent dialogue, or mock order fill is used in the live path. The dashboard runs on the same local server as the API.
+The interface is in Turkish. **İşlem** is the live buy review; **Pano** is the results and system board.
 
-## Architecture
+1. Open the local dashboard and watch the live OKX TR price, current round, and four analyst summaries. The scheduled forecast rounds run without a user request.
+2. In **İşlem**, ask the council to assess a **5 USDT AVAX buy**. Leave real execution off to review the decision without sending an order.
+3. Follow the live sequence: market snapshot → blind opinions → checked claims → peer review → fresh market check → **AL / BEKLE / ENGELLE** (`BUY / WAIT / BLOCK`). The screen shows the vote count and the rule that decided the result.
+4. Open **Zincir ve emir adımları** to inspect the Fuji commit and reveal links and the order status. Open **Pano** to inspect past forecast outcomes, analyst scores, and Darwin's challenger decision.
+
+If the council says **WAIT** or **BLOCK**, no order is sent. If it says **BUY**, a real OKX TR spot order still requires the user's explicit execution choice, enabled server configuration, a connected subaccount, and one more set of safeguards. The automatic forecast rounds **never** place orders.
+
+## Two connected loops
+
+| Loop | Trigger | What the council does | What the user gets |
+| --- | --- | --- | --- |
+| **Live buy review** | User asks about a 5 USDT AVAX purchase | Four roles vote, review peers, and face market and policy checks | `BUY`, `WAIT`, or `BLOCK`, with votes, reasons, rule checks, and Fuji evidence; an optional real spot buy only after explicit opt in |
+| **Darwin trial** | Local scheduler starts a round | Analysts predict the price direction of the completed AVAX/USDT candle 30 minutes ahead; the outcome is scored later | A time locked forecast, real outcome, Brier score, and evidence for keeping or replacing an analyst |
+
+The roles are **Momentum**, **Liquidity**, **Relative Market / Derivatives**, and **Volatility**. They are separate specialist model calls inside one Node.js service and use one OpenAI API key; they are not separate wallets or independently running processes. Analysts first respond without seeing peers, then get a chance to revise after seeing verified initial views. A numerical claim that fails the market snapshot check cannot contribute a vote. The verifier checks structured numerical fields, not every sentence of free text.
+
+### How a buy decision is reached
 
 ```text
-OKX TR Agent Trade Kit ──> market snapshot ──> four OpenAI analysts
-                                                │ blind vote → peer review
-                                                ▼
-                                       claim verifier + policy
-                                                │
-                         ┌──────────────────────┴──────────────────────┐
-                         ▼                                             ▼
-             Avalanche Fuji commit/reveal                 optional OKX TR spot BUY
-                         │                                 explicit user opt in only
-                         ▼
-              real outcome + Brier score
-                         │
-                         ▼
-                 challenger evaluation
+User: “Should I buy 5 USDT of AVAX now?”
+                    │
+                    ▼
+        Live OKX TR market snapshot
+                    │
+                    ▼
+      Four blind analyst assessments
+                    │
+                    ▼
+       Check quoted market numbers
+                    │
+                    ▼
+        Peer review and final votes
+                    │
+                    ▼
+         Read the market again
+                    │
+                    ▼
+   Fixed policy: freshness, spread, depth,
+   recent movement, price drift, verified votes
+                    │
+                    ▼
+           BUY / WAIT / BLOCK
+                    │
+                    ▼
+       Commit and reveal on Fuji
+                    │
+                    └── BUY + user opt in + safeguards
+                              → optional OKX TR spot buy
 ```
 
-Node.js serves the API and frontend. SQLite stores rounds, events, recovery state, and trade intents. The browser polls live API endpoints. The autonomous scheduler initially uses 10 minute starts to collect enough evidence for the first Darwin decision, then switches to 30 minute starts. Every forecast still has a 30 minute horizon. Missed starts are not backfilled as historical predictions.
+For example, **two BUY votes and two WAIT votes produce WAIT**, even if the order is only 5 USDT. A BUY needs at least **three verified BUY votes and zero BLOCK votes**, plus passing market checks. Stale data or insufficient order book depth can block the request. These are rules in code, not a model's promise of profit.
+
+## What can be verified
+
+| Claim | Evidence in this build |
+| --- | --- |
+| The data is live | OKX TR Agent Trade Kit ticker, candles, and order book have source timestamps and freshness states. Missing data is shown as unavailable. |
+| The forecast was made before the answer | A hash of the forecast payload is committed to an Avalanche Fuji contract before the target candle closes, then revealed after the real outcome arrives. |
+| Analyst quality is measured | Resolved rounds use a Brier score; the board also shows the constant 50% forecast as a reference. A few short horizon outcomes do not establish trading skill. |
+| Darwin actually makes a decision | A challenger is tested on six **future paired live rounds**. Promotion or rejection and analyst lineage are recorded on Fuji. A trial analyst does not vote in the active council. |
+| An order was or was not sent | The trade review records its decision and execution state separately. `ACCEPTED` is not presented as `FILLED`; an uncertain order response is not blindly retried. |
+
+Use `npm run audit:round -- <round-id>` to compare a resolved forecast with the stored payload, OKX TR target candle, score, and Fuji events. Use `npm run audit:lineage` to check the analyst ancestry and decision events directly against Fuji. The dashboard links to the relevant explorer transactions.
+
+**Avalanche Fuji stores commitments and analyst lineage.** Market data and optional spot orders live on OKX TR. A chain hash proves the committed bytes were fixed at that point in time; it does not certify the source data or make a prediction correct.
+
+## Where it runs
+
+```text
+OKX TR market ── Agent Trade Kit ──┐
+                                  ▼
+                     Node.js council coordinator
+                     ├─ four OpenAI analyst roles
+                     ├─ numerical claim verifier
+                     ├─ fixed trade policy
+                     └─ scheduler + SQLite state
+                           │             │
+                           ▼             └── same-origin live dashboard
+                Avalanche Fuji contracts
+                (commit/reveal + lineage)
+
+Optional, user-initiated BUY ── safeguards ── OKX TR spot API
+```
+
+The server and dashboard run locally at `127.0.0.1:8787`. The market snapshot refreshes in the background. Forecast rounds initially start every 10 minutes to gather enough real evidence for Darwin's first decision; after that they start every 30 minutes. **Every forecast still looks 30 minutes ahead.** Missed starts are not recreated as if they had happened live.
 
 ## Run locally
 
-Tested with **Node.js 25.6.1**. The backend uses the built in `node:sqlite` module, so use a Node.js version that provides it.
+Developed with **Node.js 25.6.1**. Use a Node.js version with the built in `node:sqlite` module.
 
 ```bash
+git clone https://github.com/yigitturaan/darwin-council.git
+cd darwin-council
 npm ci
 cp .env.example .env
+npm run wallet:create
 npm run contract:compile
 ```
 
-Add an OpenAI API key to `.env`. Create a dedicated Avalanche Fuji test wallet with `npm run wallet:create`, fund its public address with Fuji C-Chain test AVAX, then deploy both contracts:
+Add your `OPENAI_API_KEY` to `.env`. Fund the newly created wallet's **public address** with Fuji C-Chain test AVAX, then deploy the contracts and start the service:
 
 ```bash
 npm run contract:deploy
@@ -62,9 +125,11 @@ npm run lineage:deploy
 npm run backend
 ```
 
-Open **http://127.0.0.1:8787/**. `npm run check:live` checks the running service and its current integrations. Deployment scripts write contract addresses into the local `.env` file. Restart the backend after changing environment values.
+Open **http://127.0.0.1:8787/**. Deployment scripts save the Fuji contract addresses to your local `.env`; restart the backend after changing environment values. Public OKX TR market reads do not need an OKX account API key. Running the full loop uses real OpenAI calls and Fuji testnet transactions, so it needs API credit, test AVAX, and an internet connection.
 
-The market reader does not require an OKX API key. To display the connected subaccount balance or use real order execution, create a dedicated OKX TR **standard subaccount** API key with Read and Trade permissions. Put these three values in a local `.env.okx` file:
+### Optional: connect an OKX TR subaccount
+
+For a live balance display or real spot execution, create a **dedicated standard subaccount** API key with Read and Trade permissions, and put its three values in a local `.env.okx` file:
 
 ```dotenv
 OKX_API_KEY=
@@ -72,29 +137,28 @@ OKX_SECRET_KEY=
 OKX_PASSPHRASE=
 ```
 
-Run `npm run account:check` to verify the account connection without placing an order. Real orders are disabled by default (`ENABLE_LIVE_ORDERS=false`). Enabling them does not start autonomous trading: the user must also check the execution box for an individual request and receive a BUY decision. The implementation caps the request at **5 USDT**, blocks another real order for 24 hours, rechecks market data and balance before submission, and does not blindly retry an uncertain order response. No withdrawal permission is needed.
+Run `npm run account:check` to check the connection **without placing an order**. Real orders are off by default (`ENABLE_LIVE_ORDERS=false`). Even when enabled, one request must explicitly select execution and receive `BUY`. The server rechecks the market and balance, caps a request at **5 USDT**, and blocks a second real order for 24 hours. No withdrawal permission is required. Keep `.env` and `.env.okx` local; both are excluded from Git.
 
-Starting the autonomous backend uses real OpenAI API calls and Fuji testnet transactions. Keep enough API credit and test AVAX available if you leave it running.
+## Commands and code
 
-## Useful commands
-
-| Command | Purpose |
+| Command | Use |
 | --- | --- |
-| `npm run smoke:market` | Read a live OKX TR market snapshot |
-| `npm run smoke:model` | Check a real OpenAI model call |
-| `npm run smoke:fuji` | Check Fuji wallet, RPC, and contract connectivity |
-| `npm run check:live` | Check the running API and integrations |
-| `npm run audit:round -- <round-id>` | Independently verify a round against OKX TR and Fuji |
-| `npm run audit:lineage` | Verify analyst lineage transactions on Fuji |
-| `npm run db:backup` | Create and check a consistent local SQLite backup |
+| `npm run smoke:market` | Read a real OKX TR market snapshot |
+| `npm run smoke:model` | Check a real OpenAI response |
+| `npm run smoke:fuji` | Check the Fuji wallet, RPC, and contracts |
+| `npm run check:live` | Check the running API and connected services |
+| `npm run audit:round -- <round-id>` | Verify a resolved round and its chain record |
+| `npm run audit:lineage` | Verify analyst lineage on Fuji |
 
-See [backend/API.md](backend/API.md) for endpoint details and [backend/README.md](backend/README.md) for deeper implementation and recovery notes.
+- [`backend/`](backend/) contains the council, ATK reader, policy, persistence, and Solidity contracts.
+- [`frontend/`](frontend/) contains the live Turkish dashboard served by the backend.
+- [`backend/API.md`](backend/API.md) describes the HTTP interface.
+- [`backend/README.md`](backend/README.md) documents recovery, scoring, and operational details.
 
-## Boundaries
+## Inspiration and what we built from it
 
-- Short horizon direction forecasts are noisy. A few rounds or a low Brier score do not establish profitable trading ability.
-- The chain records commitments and lineage; OKX spot trades, when enabled, happen on OKX TR, not on Avalanche.
-- This build binds to `127.0.0.1` and is intended for local demonstration. It is not an internet facing trading service.
-- `.env`, `.env.okx`, SQLite data, contract build output, and local design/research notes are excluded from Git. Never commit API credentials or a Fuji private key.
+We studied [aoxbt](https://github.com/Nava-Labs/aoxbt)'s specialist agent roles, [DAIO](https://github.com/openDAIO/agents)'s inspectable consensus workflow, [LPLens](https://github.com/JeanBaptisteDurand/Open_Agent_2026)'s evidence first presentation, and [DeFlow](https://github.com/AceVikings/ethonline-defi-layer)'s clear path from analysis to guarded action. Darwin Council applies those ideas to a narrow, working **OKX TR market → analyst council → verifiable decision** flow, with a separate live trial for analyst selection. Those projects have different products, chains, and execution models; this implementation is original to this repository.
 
-The repository is a working hackathon prototype. Market access, OpenAI credit, Fuji RPC, and test AVAX are required for a complete live run.
+## Scope
+
+This hackathon build covers **AVAX/USDT on OKX TR**. It can review an on demand spot **buy**, and the code can submit that buy only under the opt in conditions above. The real order path has not been verified end to end with a filled order. It does not autonomously trade on every forecast, sell positions, or manage an OKX bot. Thirty minute direction forecasts are a noisy test question; the system reports outcomes and scores without claiming a profitable strategy. The local server is designed for a live demonstration on this machine, not public internet deployment.
