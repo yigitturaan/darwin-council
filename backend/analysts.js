@@ -135,6 +135,13 @@ export async function runCouncil(snapshot) {
     weights: weightState, chair };
 }
 
+const tradeFocus = {
+  momentum: 'Kendi oyunda kısa vadeli hareketin alımı aceleye getirip getirmediğine bak. Yalnız belirgin olumsuz ivme veya ani sıçrama varsa WAIT/BLOCK düşün; pozitif getiri tahmini şartı arama.',
+  liquidity: 'Kendi oyunda spread, derinlik ve emir defteri dengesinin bu alımı makul fiyatla karşılayıp karşılamadığına bak.',
+  relative: 'Kendi oyunda AVAX ile BTC/ETH arasındaki göreli zayıflığın somut bir bekleme nedeni olup olmadığına bak. Tek günlük negatif getiri veya tekil açık pozisyon seviyesi otomatik WAIT nedeni değildir.',
+  volatility: 'Kendi oyunda yakın fiyat aralığı, kısa hareket ve spread ile uygulama riskine bak. Sakin piyasa ve düşük oynaklık alımı engellemez; başka analistlerin göreli piyasa veya fonlama yorumlarını kendi gerekçene taşıma.',
+};
+
 async function oneTradeOpinion(openai, role, snapshot, amountUsdt, phase, peers) {
   const scoped = Object.fromEntries(role.metrics.map((key) => [key, snapshot.metrics[key]]));
   const started = Date.now();
@@ -142,7 +149,7 @@ async function oneTradeOpinion(openai, role, snapshot, amountUsdt, phase, peers)
   const response = await openai.chat.completions.create({
     model: config.model, temperature: 0.2, response_format: { type: 'json_object' },
     messages: [
-      { role: 'system', content: `Sen Darwin Council'ın ${role.label} analistisin. ${role.instruction} Kullanıcı en fazla belirtilen USDT tutarıyla AVAX spot ALMAK istiyor. BUY yalnızca eldeki veriler alımı şimdi yapmak için savunulabilir bir gerekçe sağlıyorsa; WAIT sinyal belirsizse veya daha iyi koşul bekleniyorsa; BLOCK doğrulanmış belirgin bir risk/engel varsa seç. İşlem tutarı tek başına BUY gerekçesi değildir. Kâr, gelecek fiyatı, hesap bakiyesi, ücret veya kullanıcının mevcut AVAX miktarı hakkında veri verilmediyse bildiğini iddia etme. Yalnız kendi verilen metriklerinden söz et; akran görüşlerini yeni piyasa verisi sayma. İlk aşamada diğer analistlerin görüşü yoktur; ikinci aşamada görüşlerini eleştirel değerlendir, çoğunluğa uymak zorunda değilsin. Kısa Türkçe JSON döndür: {"vote":"BUY|WAIT|BLOCK","reason":"...","claims":[{"metric":"metrik_adı","value":sayı}]}. Reason alanında HİÇBİR rakam veya yüzde işareti yazma; tüm sayısal iddialar yalnız claims alanında olmalı. En az bir, en çok dört doğrulanabilir claim kullan. Kaynak yetersizse WAIT seç.` },
+      { role: 'system', content: `Sen Darwin Council'ın ${role.label} analistisin. ${role.instruction} ${tradeFocus[role.id] || ''} Kullanıcı belirtilen USDT tutarıyla AVAX spot almayı zaten düşünüyor. Görevin fiyatın yükseleceğini veya kârı tahmin etmek değil; kendi uzmanlık alanındaki CANLI verilerle bu alımın şu anda uygulanmasına dair belirgin bir engel olup olmadığını değerlendirmek. BUY: kendi alanındaki koşullar makul ve somut bir bekleme nedeni yok. WAIT: kendi verilerinde geçici olumsuzluk veya çözülmemiş somut belirsizlik var. BLOCK: doğrulanmış ciddi risk veya engel var. Güçlü yükseliş sinyali olmamasını tek başına WAIT nedeni sayma; işlem tutarının küçük olmasını da tek başına BUY nedeni sayma. Düşük oynaklık, tek başına bekleme nedeni değildir. Kâr, gelecek fiyatı, hesap bakiyesi, ücret veya kullanıcının mevcut AVAX miktarı hakkında veri verilmediyse bildiğini iddia etme. Yalnız kendi verilen metriklerinden söz et; akran görüşlerini yeni piyasa verisi sayma. Gerekçende başka analistin metriklerini veya kaynaksız piyasa bilgisini kendi gözleminmiş gibi yazma. İlk aşamada diğer analistlerin görüşü yoktur; ikinci aşamada görüşlerini eleştirel değerlendir, çoğunluğa uymak zorunda değilsin. Kısa Türkçe JSON döndür: {"vote":"BUY|WAIT|BLOCK","reason":"...","claims":[{"metric":"metrik_adı","value":sayı}]}. Reason alanında HİÇBİR rakam veya yüzde işareti yazma; tüm sayısal iddialar yalnız claims alanında olmalı. En az bir, en çok dört doğrulanabilir claim kullan. Kaynak yetersizse WAIT seç.` },
       { role: 'user', content: JSON.stringify({ phase, instrument: snapshot.instrument, amountUsdt,
         observedAt: snapshot.observedAt, sourceTimes: snapshot.sourceTimes, metrics: scoped,
         peerInitialViews: peers || undefined }) },
@@ -168,6 +175,11 @@ async function oneTradeOpinion(openai, role, snapshot, amountUsdt, phase, peers)
 async function safeTradeOpinion(openai, role, snapshot, amountUsdt, phase, peers) {
   try { return await oneTradeOpinion(openai, role, snapshot, amountUsdt, phase, peers); }
   catch (error) {
+    // A malformed model response should not permanently remove a valid vote.
+    if (error instanceof SyntaxError || /^Invalid trade (opinion|claim)$/.test(error?.message || '')) {
+      try { return await oneTradeOpinion(openai, role, snapshot, amountUsdt, phase, peers); }
+      catch (retryError) { error = retryError; }
+    }
     setState('modelLastError', { at: Date.now(), message: modelError(error) });
     return { analystId: role.id, vote: 'WAIT', phase, at: Date.now(),
       reason: modelError(error), claims: [], status: 'ERROR' };
