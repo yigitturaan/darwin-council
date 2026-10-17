@@ -1,0 +1,35 @@
+{
+  "name": "darwin-council",
+  "private": true,
+  "type": "module",
+  "overrides": {
+    "tmp": "0.2.7"
+  },
+  "scripts": {
+    "backend": "node backend/server.js",
+    "smoke:market": "node backend/smoke-market.js",
+    "smoke:model": "node backend/smoke-model.js",
+    "smoke:council": "node backend/smoke-council.js",
+    "smoke:fuji": "node backend/chain/smoke.js",
+    "audit:round": "node backend/chain/audit-round.js",
+    "audit:lineage": "node backend/chain/audit-lineage.js",
+    "check:live": "node backend/check-live.js",
+    "account:check": "node backend/account-check.js",
+    "check:recovery": "node backend/check-recovery.js",
+    "check:resilience": "node backend/check-resilience.js",
+    "db:backup": "node backend/backup.js",
+    "contract:compile": "node backend/chain/compile.js",
+    "contract:deploy": "node backend/chain/deploy.js",
+    "lineage:deploy": "node backend/chain/deploy-lineage.js",
+    "wallet:create": "node backend/chain/create-wallet.js"
+  },
+  "dependencies": {
+    "@okx_ai/okx-trade-cli": "^1.4.8",
+    "dotenv": "^18.0.8",
+    "openai": "^7.36.0",
+    "viem": "^2.57.7"
+  },
+  "devDependencies": {
+    "solc": "^0.8.36"
+  }
+}

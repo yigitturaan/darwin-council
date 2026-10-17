@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Darwin Council · Live</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/sprites.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header>
+    <div class="logo"><div class="blocks"><i></i><i class="o"></i><i></i><i class="o"></i><i class="r"></i><i class="o"></i><i></i><i class="o"></i><i></i></div>Darwin Council</div>
+    <span class="chip" id="market-chip"><span class="d"></span>OKX TR · bağlanıyor</span>
+    <span class="chip red" id="fuji-chip"><span class="d"></span>Avalanche Fuji · bağlanıyor</span>
+    <nav class="nav">
+      <button class="btn on" data-s="square">İşlem</button>
+      <button class="btn" data-s="board">Pano</button>
+    </nav>
+  </header>
+
+  <main id="square" class="square">
+    <div class="title">
+      <div class="k" id="intent-kicker">CANLI PİYASA · AVAX/USDT</div>
+      <h1>Konsey Meydanı</h1>
+      <p id="intent-question">AVAX alımını şimdi yapmak uygun mu? Bir tutar girip konseye sor.</p>
+    </div>
+
+    <div class="table">
+      <svg id="tri" class="council-table" viewBox="0 0 17 11" role="img" aria-label="Kırmızı üçgen konsey masası" shape-rendering="crispEdges"></svg>
+      <div class="card"><div class="pct" id="verdict">—</div><div class="lbl" id="verdict-label">henüz karar yok</div></div>
+      <a class="seal" id="seal" hidden target="_blank" rel="noopener noreferrer">Avalanche kaydı</a>
+      <div class="seal" id="seal-pending">Henüz mühür yok</div>
+    </div>
+
+    <div class="agent" style="left:23%;top:32%"><div class="say think" id="vote-momentum">bekliyor…</div><svg data-c="momentum"></svg><div class="shadow"></div><div class="name">Momentum</div></div>
+    <div class="agent" style="left:66%;top:32%"><div class="say think" id="vote-liquidity">bekliyor…</div><svg data-c="likidite"></svg><div class="shadow"></div><div class="name">Likidite</div></div>
+    <div class="agent" style="left:21%;top:62%"><div class="say think" id="vote-relative">bekliyor…</div><svg data-c="turev"></svg><div class="shadow"></div><div class="name">Türev</div></div>
+    <div class="agent" style="left:67%;top:62%"><div class="say think" id="vote-volatility">bekliyor…</div><svg data-c="vol"></svg><div class="shadow"></div><div class="name">Volatilite</div></div>
+    <div class="agent trial hidden" id="trial-agent" style="left:86%;top:50%"><div class="say think" id="vote-trial">denemede</div><svg data-c="cirak"></svg><div class="shadow"></div><div class="name">Çırak</div></div>
+    <div class="agent" style="left:46%;top:9%"><div class="say think" id="chair-say">oyları topluyorum</div><svg data-c="baskan"></svg><div class="shadow"></div><div class="name">Başkan</div></div>
+
+    <div class="feed">
+      <h3>Canlı Akış <i id="feed-dot"></i></h3>
+      <div class="feed-tabs" role="tablist" aria-label="Canlı akış türü">
+        <button type="button" id="feed-tab-trade" role="tab" aria-controls="feed-trade">Alım kararı</button>
+        <button type="button" id="feed-tab-auto" role="tab" aria-controls="feed-auto">Otonom konsey</button>
+      </div>
+      <div class="feed-scroll">
+        <div id="feed-trade" role="tabpanel"><div id="feed-reasons" class="feed-reasons">Analist görüşleri bekleniyor…</div></div>
+        <div id="feed-auto" role="tabpanel" hidden><div id="feed-auto-content" class="feed-reasons">Otomatik tur yükleniyor…</div></div>
+      </div>
+      <details class="feed-history">
+        <summary>Zincir ve emir adımları <span id="feed-event-count"></span></summary>
+        <ul id="feed-list"><li>Canlı veriler yükleniyor…</li></ul>
+      </details>
+    </div>
+
+    <div class="timer"><span id="execution-message">OKX işlem bağlantısı kontrol ediliyor…</span></div>
+    <form id="intent-form" class="intent-form">
+      <label for="amount">En fazla</label>
+      <input id="amount" name="amount" type="number" min="5" max="5" step="1" value="5" required>
+      <span>USDT</span>
+      <label class="execute-choice" for="execute"><input id="execute" type="checkbox"> AL kararı çıkarsa gerçek spot alım yap</label>
+      <button class="go" id="ask-button" type="submit">▶ Konseye Sor</button>
+    </form>
+  </main>
+
+  <main id="board" class="board hidden">
+    <section class="note chain">
+      <div class="k">SON İŞLEM DEĞERLENDİRMESİ</div>
+      <h2 id="board-decision-title">Henüz istek yok</h2>
+      <div class="big" id="board-decision">—</div>
+      <div id="board-decision-detail">Canlı bir istek oluşturulduğunda oylar burada görünecek.</div>
+      <div class="stamp" id="board-execution">EMİR YOK</div>
+      <div id="board-chain" class="board-link"></div>
+    </section>
+    <section class="note">
+      <div class="k">KARAR ANINDA OKX TR VERİSİ</div>
+      <h2>Kararın zemini</h2>
+      <div class="mini-row"><span class="nm">AVAX fiyatı</span><span id="metric-price">—</span></div>
+      <div class="mini-row"><span class="nm">Alış satış farkı</span><span id="metric-spread">—</span></div>
+      <div class="mini-row"><span class="nm">Son 15 dk aralığı</span><span id="metric-range">—</span></div>
+      <div class="mini-row"><span class="nm">Kaynak zamanı</span><span id="metric-time">—</span></div>
+      <div class="muted-small" id="metric-source-note">OKX TR ATK canlı piyasa verisi yükleniyor.</div>
+    </section>
+    <section class="note">
+      <div class="k">KARAR KURALI</div>
+      <h2>Neden bu karar?</h2>
+      <div id="checks-list">Önce canlı bir değerlendirme başlat.</div>
+      <div class="muted-small">Tutarın küçük olması tek başına AL kararı verdirmez. Kâr garantisi yoktur.</div>
+    </section>
+    <section class="note chain">
+      <div class="k">DARWIN SINAVI</div>
+      <h2>Geçmiş turlar</h2>
+      <ul class="hist" id="round-history"><li>Yükleniyor…</li></ul>
+      <div class="muted-small">Bu turlar yarım saatlik yön tahminini ölçer; işlem emri değildir.</div>
+    </section>
+    <section class="note">
+      <div class="k">EVRİM · ÇIRAK SÜRECİ</div>
+      <h2 id="evolution-title">Durum yükleniyor</h2>
+      <div class="fam"><svg id="evolution-parent" data-c="vol"></svg><span class="arrow">→</span><svg data-c="cirak"></svg></div>
+      <div id="evolution-detail">Canlı sonuçlar geldikçe çırak performansı ölçülür.</div>
+      <div class="dots" id="evolution-dots"></div>
+      <div id="evolution-proof" class="muted-small"></div>
+    </section>
+    <section class="note">
+      <div class="k">SİSTEM</div>
+      <h2 id="system-title">Kontrol ediliyor</h2>
+      <div class="mini-row"><span class="nm">OKX TR verisi</span><span id="system-okx">—</span></div>
+      <div class="mini-row"><span class="nm">Alt hesap · kullanılabilir</span><span id="system-balance">—</span></div>
+      <div class="mini-row"><span class="nm">Avalanche Fuji</span><span id="system-fuji">—</span></div>
+      <div class="mini-row"><span class="nm">Çözülen tahmin</span><span id="system-rounds">—</span></div>
+      <div class="mini-row"><span class="nm">Konsey Brier puanı</span><span id="system-brier">—</span></div>
+      <div class="muted-small">Düşük Brier puanı daha iyidir. Az sayıda tur başarı kanıtı değildir.</div>
+    </section>
+  </main>
+</body>
+</html>

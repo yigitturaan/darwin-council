@@ -1,0 +1,16 @@
+node_modules/
+.env
+.env.*
+!.env.example
+data/
+backend/contracts/build/
+.DS_Store
+
+# Local research, design drafts, and development handoff notes.
+/tasarim/
+/ads*/
+/BACKEND_KABUL.md
+/DARWIN_DEVLOG.md
+/DARWIN_KONSEYI.md
+/DARWIN_KONSEYI_ROADMAP.md
+/ISLEM_KONSEYI_DEVIR.md
