@@ -2,6 +2,20 @@
 
 ### A live AI council that can say **WAIT** before an AVAX buy — and show exactly why.
 
+**[▶ Live dashboard](https://darwin-council.vercel.app)** · **[▶ Pitch deck](https://darwin-council.vercel.app/pitch)** · **[🇹🇷 Jüri için (Turkish, for judges)](FOR_JUDGES.md)** · **[Lineage contract](https://testnet.snowtrace.io/address/0xd75db90c8337a12de7293882b0251b0af78619dd)** · **[Commit contract](https://testnet.snowtrace.io/address/0x3cd8babe00dd10c08ebfc6435c1a41e6bde5a95a)**
+
+![Darwin Council](docs/darwin-council.svg)
+
+> Built for the **OKX TR × Team1 Agentic Hackathon**, Ankara, 17 October 2026. Judges: the Turkish summary in [FOR_JUDGES.md](FOR_JUDGES.md) maps the project to every judging criterion and links the live on-chain evidence.
+
+| Built with | Used for |
+| --- | --- |
+| **OKX Agent Trade Kit** | Live OKX TR market data, historical candles for scoring, subaccount balance, and spot orders |
+| **Avalanche Fuji (C-Chain testnet)** | `DarwinCommit` (commit/reveal of every forecast and buy decision) and `DarwinLineage` (analyst birth, trial result, retirement) |
+| **OpenAI** | Four specialist analyst roles and a chair that explains but cannot change the decision |
+
+*The hosted dashboard is a static copy of the interface. The live backend runs locally (`127.0.0.1:8787`) and is shown in the live demo.*
+
 **Darwin Council** helps a person decide whether *now* is a reasonable moment to buy AVAX on OKX TR. Four AI analysts inspect fresh market data from different angles, challenge one another's views, and vote **BUY**, **WAIT**, or **BLOCK**. The final decision comes from explicit, inspectable rules. A small order is never treated as an automatic buy.
 
 Meanwhile, the same analysts take an ongoing test: they forecast the next 30 minute AVAX/USDT outcome, lock their answer on Avalanche Fuji before it is known, and are scored against the real result. A new analyst can earn a seat only by beating an incumbent on future live rounds.
